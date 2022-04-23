@@ -56,9 +56,14 @@ public:
   double Perimeter() override
   {
     double total = {};
-    for(int i = 1; i < m_Points.size(); ++i)
+    size_t i = 1;
+    for(i = 1; i < m_Points.size(); ++i)
     {
       total += Distance(m_Points[i-1], m_Points[i]);
+    }
+    if(i > 1)
+    {
+      total += Distance(m_Points[0], m_Points[i-1]);
     }
     return total;
   }
@@ -309,7 +314,8 @@ bool ConvertStringToLength(const std::string &str, std::vector<double> &values)
 
 void ConstructTriangleFromLengths(const std::array<double, 3> &lengths, Triangle &out)
 {
-  if(lengths[0] >= (lengths[1] + lengths[2]))
+  if(lengths[0] >= (lengths[1] + lengths[2])
+      || (lengths[0] + lengths[2]) <= lengths[1])
   {
     throw TriangleConstructionError(lengths[0], lengths[1], lengths[2]);
   } 
@@ -370,6 +376,7 @@ int main(int argc, char** argv)
               Triangle t {};
               ConstructTriangleFromLengths(arrayOfLength, t);
               std::cout << "L'air du triangle est : " << t.Area() << "\n";
+              std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
             } 
             catch(const TriangleConstructionError& e)
             {
