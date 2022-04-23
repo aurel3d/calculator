@@ -2,6 +2,8 @@
 #include <math.h>
 #include <iostream>
 #include <array>
+#include <stdlib.h>
+#include <algorithm>
 
 struct Point
 {
@@ -209,11 +211,12 @@ private:
   Circle m_InternalCircle;
 };
 
-bool ConvertToDouble(const std::string &value)
+bool ConvertToDouble(const std::string &value, double &out)
 {
+  std::cout << "Convert to double " << value << "\n";
   try
   {
-    std::stod(value);
+    out = std::stod(value);
   }
   catch(const std::exception& e)
   {
@@ -227,7 +230,7 @@ bool ConvertToDouble(const std::string &value)
 bool ConvertStringToLength(const std::string &str, std::vector<double> &values)
 {
   std::string currentLength;
-  for(int i = 0; i < str.size(); ++i)
+  for(size_t i = 0; i < str.size(); ++i)
   {
     if(str[i] != '/')
     {
@@ -236,7 +239,7 @@ bool ConvertStringToLength(const std::string &str, std::vector<double> &values)
     else
     {
       double value = {};
-      if(ConvertToDouble(currentLength))
+      if(ConvertToDouble(currentLength, value))
       {
         values.push_back(value);
       }
@@ -249,7 +252,7 @@ bool ConvertStringToLength(const std::string &str, std::vector<double> &values)
   }
 
   double value = {};
-  if(ConvertToDouble(currentLength))
+  if(ConvertToDouble(currentLength, value))
   {
     values.push_back(value);
   }
@@ -263,25 +266,48 @@ bool ConvertStringToLength(const std::string &str, std::vector<double> &values)
 
 Triangle ConstructTriangleFromLengths(const std::array<double, 3> &lengths)
 {
+  std::cout << lengths[0] << " " << lengths[1] << " " << lengths[2] << "\n";
 
+  Point p1 {0.0, 0.0};
+  Point p2 {lengths[0], 0.0};
+  Point p3 {0.0, 0.0};
+
+  p3.y = (std::pow(lengths[0], 2) + std::pow(lengths[2], 2) - std::pow(lengths[1], 2)) / (2*lengths[0]);
+  p3.x = std::sqrt(std::pow(lengths[2], 2) - std::pow(p3.y, 2));
+
+  Triangle t {};
+  t.SetP1(p1);
+  t.SetP2(p2);
+  t.SetP3(p3);
+
+  std::cout << "P1 " << p1.x << " " << p1.y << "\n";
+  std::cout << "P2 " << p2.x << " " << p2.y << "\n";
+  std::cout << "P3 " << p3.x << " " << p3.y << "\n";
+
+  return t;
 }
+
+const char* choices = 
+  "Choix de la forme\n"
+  "1 - Triangle quelconque\n"
+  "2 - Triangle rectanle\n"
+  "3 - Triangle isocel\n"
+  "4 - Carre\n"
+  "5 - Rectangle\n"
+  "6 - Cercle\n"
+  "7 - Couronne\n"
+  "8 - Exit\n";
 
 int main(int argc, char** argv)
 {
+
+  std::cout << choices << std::flush;
+
   bool running = true;
 
   while(running)
   {
-    std::cout << "Choix de la forme\n";
-    std::cout << "1 - Triangle quelconque\n";
-    std::cout << "2 - Triangle rectanle\n";
-    std::cout << "3 - Triangle isocel\n";
-    std::cout << "4 - Carre\n";
-    std::cout << "5 - Rectangle\n";
-    std::cout << "6 - Cercle\n";
-    std::cout << "7 - Couronne\n";
-    std::cout << "8 - Exit\n";
-
+    std::cout << "Choix de la forme : ";
     std::string choice;
     std::cin >> choice;
 
@@ -289,7 +315,7 @@ int main(int argc, char** argv)
     {
       if(choice == "1")
       {
-        std::cout << "Saisir la longueur des cotes (5.5/2/3.2)\n";
+        std::cout << "Saisir la longueur des cotes (5.5/2/3.2) : ";
         std::string value;
         std::cin >> value;
         std::vector<double> lengths;
@@ -297,7 +323,17 @@ int main(int argc, char** argv)
         {
           if(lengths.size() == 3)
           {
+            std::cout << "Lengths " << lengths[0] << " " << lengths[1] << " " << lengths[2] << "\n";
+            std::array<double, 3> arrayOfLength = {};
+            std::copy_n(lengths.begin(), 3, arrayOfLength.begin());
 
+            Triangle t = ConstructTriangleFromLengths(arrayOfLength);
+
+            std::cout << "L'air du triangle est : " << t.Area() << "\n";
+          }
+          else
+          {
+            std::cout << "Erreur : Il faut saisire trois valeurs"; 
           }
         }
         else
