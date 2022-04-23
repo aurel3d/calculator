@@ -4,6 +4,29 @@
 #include <array>
 #include <stdlib.h>
 #include <algorithm>
+#include <exception>
+#include <memory>
+
+struct TriangleConstructionError : public std::exception
+{
+  double m_Side1;
+  double m_Side2;
+  double m_Side3;
+  
+  TriangleConstructionError(double side1, double side2, double side3):
+    m_Side1 {side1},
+    m_Side2 {side2},
+    m_Side3 {side3}
+  {
+  }
+
+	const char* what() const throw()
+  {
+    char *message = (char*)malloc(200 * sizeof(char*));
+    sprintf(message, "Impossible de creer un triangle avec les valeurs %f %f %f", m_Side1, m_Side2, m_Side3);
+    return message;
+  }
+};
 
 struct Point
 {
@@ -13,7 +36,7 @@ struct Point
 
 double Distance(const Point &p1, const Point &p2)
 {
-  return std::sqrt(std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p2.y, 2));
+  return std::sqrt(std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2));
 }
 
 class Shape
@@ -22,12 +45,23 @@ public:
   Shape() {}
 
   virtual double Area() = 0;
+  virtual double Perimeter() = 0;
 };
 
 class Polygon : public Shape
 {
 public:
   Polygon() {}
+
+  double Perimeter() override
+  {
+    double total = {};
+    for(int i = 1; i < m_Points.size(); ++i)
+    {
+      total += Distance(m_Points[i-1], m_Points[i]);
+    }
+    return total;
+  }
 
 protected:
   std::vector<Point> m_Points;
@@ -177,6 +211,11 @@ public:
     return M_PI * std::pow(m_Radius, 2);
   }
 
+  double Perimeter() override
+  {
+    return 2 * M_PI * m_Radius;
+  }
+
 private:
   double m_Radius;
 };
@@ -206,6 +245,11 @@ public:
     return m_ExternalCircle.Area() - m_InternalCircle.Area();
   }
 
+  double Perimeter() override
+  {
+    return m_ExternalCircle.Perimeter() + m_InternalCircle.Perimeter();
+  }
+
 private:
   Circle m_ExternalCircle;
   Circle m_InternalCircle;
@@ -213,7 +257,6 @@ private:
 
 bool ConvertToDouble(const std::string &value, double &out)
 {
-  std::cout << "Convert to double " << value << "\n";
   try
   {
     out = std::stod(value);
@@ -264,27 +307,23 @@ bool ConvertStringToLength(const std::string &str, std::vector<double> &values)
   return true;
 }
 
-Triangle ConstructTriangleFromLengths(const std::array<double, 3> &lengths)
+void ConstructTriangleFromLengths(const std::array<double, 3> &lengths, Triangle &out)
 {
-  std::cout << lengths[0] << " " << lengths[1] << " " << lengths[2] << "\n";
+  if(lengths[0] >= (lengths[1] + lengths[2]))
+  {
+    throw TriangleConstructionError(lengths[0], lengths[1], lengths[2]);
+  } 
 
   Point p1 {0.0, 0.0};
   Point p2 {lengths[0], 0.0};
   Point p3 {0.0, 0.0};
 
-  p3.y = (std::pow(lengths[0], 2) + std::pow(lengths[2], 2) - std::pow(lengths[1], 2)) / (2*lengths[0]);
-  p3.x = std::sqrt(std::pow(lengths[2], 2) - std::pow(p3.y, 2));
+  p3.x = (std::pow(lengths[0], 2) + std::pow(lengths[2], 2) - std::pow(lengths[1], 2)) / (2*lengths[0]);
+  p3.y = std::sqrt(std::pow(lengths[2], 2) - std::pow(p3.x, 2));
 
-  Triangle t {};
-  t.SetP1(p1);
-  t.SetP2(p2);
-  t.SetP3(p3);
-
-  std::cout << "P1 " << p1.x << " " << p1.y << "\n";
-  std::cout << "P2 " << p2.x << " " << p2.y << "\n";
-  std::cout << "P3 " << p3.x << " " << p3.y << "\n";
-
-  return t;
+  out.SetP1(p1);
+  out.SetP2(p2);
+  out.SetP3(p3);
 }
 
 const char* choices = 
@@ -323,13 +362,19 @@ int main(int argc, char** argv)
         {
           if(lengths.size() == 3)
           {
-            std::cout << "Lengths " << lengths[0] << " " << lengths[1] << " " << lengths[2] << "\n";
             std::array<double, 3> arrayOfLength = {};
             std::copy_n(lengths.begin(), 3, arrayOfLength.begin());
 
-            Triangle t = ConstructTriangleFromLengths(arrayOfLength);
-
-            std::cout << "L'air du triangle est : " << t.Area() << "\n";
+            try
+            {
+              Triangle t {};
+              ConstructTriangleFromLengths(arrayOfLength, t);
+              std::cout << "L'air du triangle est : " << t.Area() << "\n";
+            } 
+            catch(const TriangleConstructionError& e)
+            {
+              std::cerr << e.what() << '\n';
+            }
           }
           else
           {
@@ -340,6 +385,10 @@ int main(int argc, char** argv)
         {
           std::cout << "Les donnees saisies ne sont pas correctes\n";
         }
+
+      }
+      else if(choice == "2")
+      {
 
       }
       else if(choice == "8")
