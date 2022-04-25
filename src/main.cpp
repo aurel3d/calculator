@@ -6,6 +6,11 @@
 #include <algorithm>
 #include <exception>
 #include <memory>
+#include <string>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 struct TriangleConstructionError : public std::exception
 {
@@ -23,7 +28,79 @@ struct TriangleConstructionError : public std::exception
 	const char* what() const throw()
   {
     char *message = (char*)malloc(200 * sizeof(char*));
-    sprintf(message, "Impossible de creer un triangle avec les valeurs %f %f %f", m_Side1, m_Side2, m_Side3);
+    sprintf_s(message, 200, "Impossible de creer un triangle avec les valeurs %f %f %f", m_Side1, m_Side2, m_Side3);
+    return message;
+  }
+};
+
+struct SquareConstructionError : public std::exception
+{
+  double m_Width;
+  
+  SquareConstructionError(double width):
+    m_Width(width)
+  {
+  }
+
+	const char* what() const throw()
+  {
+    char *message = (char*)malloc(200 * sizeof(char*));
+    sprintf_s(message, 200, "Impossible de creer un carre avec la valeur %f", m_Width);
+    return message;
+  }
+};
+
+struct RectangleConstructionError : public std::exception
+{
+  double m_Width;
+  double m_Height;
+  
+  RectangleConstructionError(double width, double height):
+    m_Width(width),
+    m_Height(height)
+  {
+  }
+
+	const char* what() const throw()
+  {
+    char *message = (char*)malloc(200 * sizeof(char*));
+    sprintf_s(message, 200, "Impossible de creer un carre avec la valeurs %f %f", m_Width, m_Height);
+    return message;
+  }
+};
+
+struct CircleConstructionError : public std::exception
+{
+  double m_Radius;
+  
+  CircleConstructionError(double radius):
+    m_Radius(radius)
+  {
+  }
+
+	const char* what() const throw()
+  {
+    char *message = (char*)malloc(200 * sizeof(char*));
+    sprintf_s(message, 200, "Impossible de creer un cercle avec la valeurs %f", m_Radius);
+    return message;
+  }
+};
+
+struct RingConstructionError : public std::exception
+{
+  double m_Radius1;
+  double m_Radius2;
+  
+  RingConstructionError(double radius1, double radius2):
+    m_Radius1(radius1),
+    m_Radius2(radius2)
+  {
+  }
+
+	const char* what() const throw()
+  {
+    char *message = (char*)malloc(200 * sizeof(char*));
+    sprintf_s(message, 200, "Impossible de creer une couronne avec les valeurs %f %f", m_Radius1, m_Radius2);
     return message;
   }
 };
@@ -111,6 +188,10 @@ public:
     m_Points[2] = point;
   }
 
+  /*
+  Calcul de l'aire grace a la formule de Heron
+  https://fr.wikipedia.org/wiki/Formule_de_H%C3%A9ron
+  */
   double Area() override
   {
     double AB = Distance(m_Points[0], m_Points[1]);
@@ -225,10 +306,10 @@ private:
   double m_Radius;
 };
 
-class Annulus : public Shape
+class Ring : public Shape
 {
 public:
-  Annulus():
+  Ring():
     m_ExternalCircle{},
     m_InternalCircle{}
   {
@@ -314,8 +395,8 @@ bool ConvertStringToLength(const std::string &str, std::vector<double> &values)
 
 void ConstructTriangleFromLengths(const std::array<double, 3> &lengths, Triangle &out)
 {
-  if(lengths[0] >= (lengths[1] + lengths[2])
-      || (lengths[0] + lengths[2]) <= lengths[1])
+  if( (lengths[0] >= (lengths[1] + lengths[2]))
+    ||(lengths[0] <= std::abs(lengths[1] - lengths[2])))
   {
     throw TriangleConstructionError(lengths[0], lengths[1], lengths[2]);
   } 
@@ -332,21 +413,368 @@ void ConstructTriangleFromLengths(const std::array<double, 3> &lengths, Triangle
   out.SetP3(p3);
 }
 
+void ConstructRectangleTriangleFromLengths(const std::array<double, 2> &lengths, Triangle &out)
+{
+  if( lengths[0] <= 0.0 || lengths[1] <= 0.0)
+  {
+    throw TriangleConstructionError(lengths[0], lengths[1], 0.0);
+  } 
+
+  Point p1 {0.0, 0.0};
+  Point p2 {lengths[0], 0.0};
+  Point p3 {0.0, lengths[1]};
+
+  out.SetP1(p1);
+  out.SetP2(p2);
+  out.SetP3(p3);
+}
+
+void ConstructSquareFromLengths(double width, Square &out)
+{
+  if(width <= 0.0)
+  {
+    throw SquareConstructionError(width);
+  }
+
+  out.SetWidth(width);
+}
+
+void ConstructRectangleFromLengths(double width, double height, Rectangle &out)
+{
+  if(width <= 0.0)
+  {
+    throw SquareConstructionError(width);
+  }
+
+  out.SetDimensions(width, height);
+}
+
+void ConstructCircleFromRadius(double radius, Circle &out)
+{
+  if(radius <= 0.0)
+  {
+    throw CircleConstructionError(radius);
+  }
+
+  out.SetRadius(radius);
+}
+
+void ConstructRingFromRadii(double internalRadius, double externalRadius, Ring &out)
+{
+  if(internalRadius <= 0.0 || externalRadius <= 0.0)
+  {
+    throw RingConstructionError(internalRadius, externalRadius);
+  }
+
+  Circle c1, c2;
+  c1.SetRadius(internalRadius);
+  c2.SetRadius(externalRadius);
+
+  out.SetInternalCircle(c1);
+  out.SetExternalCircle(c2);
+}
+
+void InputChoice1()
+{
+  std::cout << "Saisir la longueur des trois cotes (AB/BC/BA) : ";
+  std::string value;
+  std::cin >> value;
+  std::vector<double> lengths;
+  if(ConvertStringToLength(value, lengths))
+  {
+    if(lengths.size() == 3)
+    {
+      std::array<double, 3> arrayOfLength = {};
+      std::copy_n(lengths.begin(), 3, arrayOfLength.begin());
+
+      try
+      {
+        Triangle t {};
+        ConstructTriangleFromLengths(arrayOfLength, t);
+        std::cout << "L'air du triangle est : " << t.Area() << "\n";
+        std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
+      } 
+      catch(const TriangleConstructionError& e)
+      {
+        std::cerr << e.what() << '\n';
+      }
+    }
+    else
+    {
+      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+    }
+  }
+  else
+  {
+    std::cout << "Les donnees saisies ne sont pas correctes\n";
+  }
+}
+
+void InputChoice2()
+{
+  std::cout << "Saisir la longueur Base et Hauteur (Base/Hauteur) : ";
+  std::string value;
+  std::cin >> value;
+  std::vector<double> lengths;
+  if(ConvertStringToLength(value, lengths))
+  {
+    if(lengths.size() == 2)
+    {
+      std::array<double, 2> arrayOfLength = {};
+      std::copy_n(lengths.begin(), 2, arrayOfLength.begin());
+
+      try
+      {
+        Triangle t {};
+        ConstructRectangleTriangleFromLengths(arrayOfLength, t);
+        std::cout << "L'air du triangle est : " << t.Area() << "\n";
+        std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
+      } 
+      catch(const TriangleConstructionError& e)
+      {
+        std::cerr << e.what() << '\n';
+      }
+    }
+    else
+    {
+      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+    }
+  }
+  else
+  {
+    std::cout << "Les donnees saisies ne sont pas correctes\n";
+  }
+}
+
+void InputChoice3()
+{
+  std::cout << "Saisir la longueur Base et Cote (Base/Cote) : ";
+  std::string value;
+  std::cin >> value;
+  std::vector<double> lengths;
+  if(ConvertStringToLength(value, lengths))
+  {
+    if(lengths.size() == 2)
+    {
+      std::array<double, 3> arrayOfLength = {};
+      std::copy_n(lengths.begin(), 2, arrayOfLength.begin());
+      arrayOfLength[2] = lengths[1];
+      try
+      {
+        Triangle t {};
+        ConstructTriangleFromLengths(arrayOfLength, t);
+        std::cout << "L'air du triangle est : " << t.Area() << "\n";
+        std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
+      } 
+      catch(const TriangleConstructionError& e)
+      {
+        std::cerr << e.what() << '\n';
+      }
+    }
+    else
+    {
+      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+    }
+  }
+  else
+  {
+    std::cout << "Les donnees saisies ne sont pas correctes\n";
+  }
+}
+
+void InputChoice4()
+{
+  std::cout << "Saisir la longueur du Cote (Cote) : ";
+  std::string value;
+  std::cin >> value;
+  std::vector<double> lengths;
+  if(ConvertStringToLength(value, lengths))
+  {
+    if(lengths.size() == 1)
+    {
+      std::array<double, 3> arrayOfLength = {};
+      std::copy_n(lengths.begin(), 1, arrayOfLength.begin());
+      arrayOfLength[1] = lengths[0];
+      arrayOfLength[2] = lengths[0];
+      try
+      {
+        Triangle t {};
+        ConstructTriangleFromLengths(arrayOfLength, t);
+        std::cout << "L'air du triangle est : " << t.Area() << "\n";
+        std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
+      } 
+      catch(const TriangleConstructionError& e)
+      {
+        std::cerr << e.what() << '\n';
+      }
+    }
+    else
+    {
+      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+    }
+  }
+  else
+  {
+    std::cout << "Les donnees saisies ne sont pas correctes\n";
+  }
+}
+
+void InputChoice5()
+{
+  std::cout << "Saisir la longueur du Cote (Cote) : ";
+  std::string value;
+  std::cin >> value;
+  std::vector<double> lengths;
+  if(ConvertStringToLength(value, lengths))
+  {
+    if(lengths.size() == 1)
+    {
+      double width = lengths[0];
+      try
+      {
+        Square s {};
+        ConstructSquareFromLengths(width, s);
+        std::cout << "L'air du carre est : " << s.Area() << "\n";
+        std::cout << "Le perimetre du carre est : " << s.Perimeter() << "\n";
+      } 
+      catch(const SquareConstructionError& e)
+      {
+        std::cerr << e.what() << '\n';
+      }
+    }
+    else
+    {
+      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+    }
+  }
+  else
+  {
+    std::cout << "Les donnees saisies ne sont pas correctes\n";
+  }
+}
+
+void InputChoice6()
+{
+  std::cout << "Saisir la longueur de la largeur et de la hauteur (Largeur/Hauteur) : ";
+  std::string value;
+  std::cin >> value;
+  std::vector<double> lengths;
+  if(ConvertStringToLength(value, lengths))
+  {
+    if(lengths.size() == 2)
+    {
+      double width = lengths[0];
+      double height = lengths[1];
+      try
+      {
+        Rectangle r {};
+        ConstructRectangleFromLengths(width, height, r);
+        std::cout << "L'air du carre est : " << r.Area() << "\n";
+        std::cout << "Le perimetre du carre est : " << r.Perimeter() << "\n";
+      } 
+      catch(const SquareConstructionError& e)
+      {
+        std::cerr << e.what() << '\n';
+      }
+    }
+    else
+    {
+      std::cout << "Erreur : Il faut saisire deux valeurs"; 
+    }
+  }
+  else
+  {
+    std::cout << "Les donnees saisies ne sont pas correctes\n";
+  }
+}
+
+void InputChoice7()
+{
+  std::cout << "Saisir la longueur du rayon (Rayon) : ";
+  std::string value;
+  std::cin >> value;
+  std::vector<double> lengths;
+  if(ConvertStringToLength(value, lengths))
+  {
+    if(lengths.size() == 1)
+    {
+      double radius = lengths[0];
+      try
+      {
+        Circle c {};
+        ConstructCircleFromRadius(radius, c);
+        std::cout << "L'air du cercle est : " << c.Area() << "\n";
+        std::cout << "Le perimetre du cercle est : " << c.Perimeter() << "\n";
+      } 
+      catch(const CircleConstructionError& e)
+      {
+        std::cerr << e.what() << '\n';
+      }
+    }
+    else
+    {
+      std::cout << "Erreur : Il faut saisire une valeurs"; 
+    }
+  }
+  else
+  {
+    std::cout << "Les donnees saisies ne sont pas correctes\n";
+  }
+}
+
+void InputChoice8()
+{
+  std::cout << "Saisir Rayon interrieur et rayon exterieur (Rayon/Rayon) : ";
+  std::string value;
+  std::cin >> value;
+  std::vector<double> lengths;
+  if(ConvertStringToLength(value, lengths))
+  {
+    if(lengths.size() == 2)
+    {
+      double radius1 = lengths[0];
+      double radius2 = lengths[1];
+      try
+      {
+        Ring r {};
+        ConstructRingFromRadii(radius1, radius2, r);
+        std::cout << "L'air du cercle est : " << r.Area() << "\n";
+        std::cout << "Le perimetre du cercle est : " << r.Perimeter() << "\n";
+      } 
+      catch(const RingConstructionError& e)
+      {
+        std::cerr << e.what() << '\n';
+      }
+    }
+    else
+    {
+      std::cout << "Erreur : Il faut saisire deux valeurs"; 
+    }
+  }
+  else
+  {
+    std::cout << "Les donnees saisies ne sont pas correctes\n";
+  }
+}
+
+
 const char* choices = 
+  "Toutles les logeurs sont en mm\n"
+  "Les longueurs sont saparees par des / (slash)\n"
   "Choix de la forme\n"
   "1 - Triangle quelconque\n"
   "2 - Triangle rectanle\n"
   "3 - Triangle isocel\n"
-  "4 - Carre\n"
-  "5 - Rectangle\n"
-  "6 - Cercle\n"
-  "7 - Couronne\n"
-  "8 - Exit\n";
+  "4 - Triangle equilateral\n"
+  "5 - Carre\n"
+  "6 - Rectangle\n"
+  "7 - Cercle\n"
+  "8 - Couronne\n"
+  "9 - Exit\n";
 
 int main(int argc, char** argv)
 {
-
-  std::cout << choices << std::flush;
+  std::cout << choices << std::endl;
 
   bool running = true;
 
@@ -360,45 +788,37 @@ int main(int argc, char** argv)
     {
       if(choice == "1")
       {
-        std::cout << "Saisir la longueur des cotes (5.5/2/3.2) : ";
-        std::string value;
-        std::cin >> value;
-        std::vector<double> lengths;
-        if(ConvertStringToLength(value, lengths))
-        {
-          if(lengths.size() == 3)
-          {
-            std::array<double, 3> arrayOfLength = {};
-            std::copy_n(lengths.begin(), 3, arrayOfLength.begin());
-
-            try
-            {
-              Triangle t {};
-              ConstructTriangleFromLengths(arrayOfLength, t);
-              std::cout << "L'air du triangle est : " << t.Area() << "\n";
-              std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
-            } 
-            catch(const TriangleConstructionError& e)
-            {
-              std::cerr << e.what() << '\n';
-            }
-          }
-          else
-          {
-            std::cout << "Erreur : Il faut saisire trois valeurs"; 
-          }
-        }
-        else
-        {
-          std::cout << "Les donnees saisies ne sont pas correctes\n";
-        }
-
+        InputChoice1();
       }
       else if(choice == "2")
       {
-
+        InputChoice2();
+      }
+      else if(choice == "3")
+      {
+        InputChoice3();
+      }
+      else if(choice == "4")
+      {
+        InputChoice4();
+      }
+      else if(choice == "5")
+      {
+        InputChoice5();
+      }
+      else if(choice == "6")
+      {
+        InputChoice6();
+      }
+      else if(choice == "7")
+      {
+        InputChoice7();
       }
       else if(choice == "8")
+      {
+        InputChoice8();
+      }
+      else if(choice == "9")
       {
         running = false;
         break;
