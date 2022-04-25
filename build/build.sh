@@ -1,0 +1,1 @@
+g++ -o Calculator -Wall -O3 ../src/main2.cpp

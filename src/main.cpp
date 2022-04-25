@@ -7,103 +7,15 @@
 #include <exception>
 #include <memory>
 #include <string>
+#include <stdio.h>
+
+#include "exceptions.h"
+#include "utils.hpp"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-struct TriangleConstructionError : public std::exception
-{
-  double m_Side1;
-  double m_Side2;
-  double m_Side3;
-  
-  TriangleConstructionError(double side1, double side2, double side3):
-    m_Side1 {side1},
-    m_Side2 {side2},
-    m_Side3 {side3}
-  {
-  }
-
-	const char* what() const throw()
-  {
-    char *message = (char*)malloc(200 * sizeof(char*));
-    sprintf_s(message, 200, "Impossible de creer un triangle avec les valeurs %f %f %f", m_Side1, m_Side2, m_Side3);
-    return message;
-  }
-};
-
-struct SquareConstructionError : public std::exception
-{
-  double m_Width;
-  
-  SquareConstructionError(double width):
-    m_Width(width)
-  {
-  }
-
-	const char* what() const throw()
-  {
-    char *message = (char*)malloc(200 * sizeof(char*));
-    sprintf_s(message, 200, "Impossible de creer un carre avec la valeur %f", m_Width);
-    return message;
-  }
-};
-
-struct RectangleConstructionError : public std::exception
-{
-  double m_Width;
-  double m_Height;
-  
-  RectangleConstructionError(double width, double height):
-    m_Width(width),
-    m_Height(height)
-  {
-  }
-
-	const char* what() const throw()
-  {
-    char *message = (char*)malloc(200 * sizeof(char*));
-    sprintf_s(message, 200, "Impossible de creer un carre avec la valeurs %f %f", m_Width, m_Height);
-    return message;
-  }
-};
-
-struct CircleConstructionError : public std::exception
-{
-  double m_Radius;
-  
-  CircleConstructionError(double radius):
-    m_Radius(radius)
-  {
-  }
-
-	const char* what() const throw()
-  {
-    char *message = (char*)malloc(200 * sizeof(char*));
-    sprintf_s(message, 200, "Impossible de creer un cercle avec la valeurs %f", m_Radius);
-    return message;
-  }
-};
-
-struct RingConstructionError : public std::exception
-{
-  double m_Radius1;
-  double m_Radius2;
-  
-  RingConstructionError(double radius1, double radius2):
-    m_Radius1(radius1),
-    m_Radius2(radius2)
-  {
-  }
-
-	const char* what() const throw()
-  {
-    char *message = (char*)malloc(200 * sizeof(char*));
-    sprintf_s(message, 200, "Impossible de creer une couronne avec les valeurs %f %f", m_Radius1, m_Radius2);
-    return message;
-  }
-};
 
 struct Point
 {
@@ -341,58 +253,6 @@ private:
   Circle m_InternalCircle;
 };
 
-bool ConvertToDouble(const std::string &value, double &out)
-{
-  try
-  {
-    out = std::stod(value);
-  }
-  catch(const std::exception& e)
-  {
-    std::cerr << e.what() << '\n';
-    return false;
-  }
-
-  return true;
-}
-
-bool ConvertStringToLength(const std::string &str, std::vector<double> &values)
-{
-  std::string currentLength;
-  for(size_t i = 0; i < str.size(); ++i)
-  {
-    if(str[i] != '/')
-    {
-      currentLength.push_back(str[i]);
-    }
-    else
-    {
-      double value = {};
-      if(ConvertToDouble(currentLength, value))
-      {
-        values.push_back(value);
-      }
-      else
-      {
-        return false;
-      }
-      currentLength.clear();
-    }
-  }
-
-  double value = {};
-  if(ConvertToDouble(currentLength, value))
-  {
-    values.push_back(value);
-  }
-  else
-  {
-    return false;
-  }
-  
-  return true;
-}
-
 void ConstructTriangleFromLengths(const std::array<double, 3> &lengths, Triangle &out)
 {
   if( (lengths[0] >= (lengths[1] + lengths[2]))
@@ -480,7 +340,7 @@ void InputChoice1()
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
-  if(ConvertStringToLength(value, lengths))
+  if(utils::ConvertStringToLength(value, lengths))
   {
     if(lengths.size() == 3)
     {
@@ -516,7 +376,7 @@ void InputChoice2()
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
-  if(ConvertStringToLength(value, lengths))
+  if(utils::ConvertStringToLength(value, lengths))
   {
     if(lengths.size() == 2)
     {
@@ -552,7 +412,7 @@ void InputChoice3()
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
-  if(ConvertStringToLength(value, lengths))
+  if(utils::ConvertStringToLength(value, lengths))
   {
     if(lengths.size() == 2)
     {
@@ -588,7 +448,7 @@ void InputChoice4()
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
-  if(ConvertStringToLength(value, lengths))
+  if(utils::ConvertStringToLength(value, lengths))
   {
     if(lengths.size() == 1)
     {
@@ -625,7 +485,7 @@ void InputChoice5()
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
-  if(ConvertStringToLength(value, lengths))
+  if(utils::ConvertStringToLength(value, lengths))
   {
     if(lengths.size() == 1)
     {
@@ -659,7 +519,7 @@ void InputChoice6()
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
-  if(ConvertStringToLength(value, lengths))
+  if(utils::ConvertStringToLength(value, lengths))
   {
     if(lengths.size() == 2)
     {
@@ -694,7 +554,7 @@ void InputChoice7()
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
-  if(ConvertStringToLength(value, lengths))
+  if(utils::ConvertStringToLength(value, lengths))
   {
     if(lengths.size() == 1)
     {
@@ -728,7 +588,7 @@ void InputChoice8()
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
-  if(ConvertStringToLength(value, lengths))
+  if(utils::ConvertStringToLength(value, lengths))
   {
     if(lengths.size() == 2)
     {
