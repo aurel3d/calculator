@@ -14,14 +14,21 @@
 #include "geom.hpp"
 #include "algo.hpp"
 #include "utils.hpp"
+#include "Shape.h"
+#include "ShapeFactory.h"
 
+void DisplayShapeResult(const Shape &shape)
+{
+  std::cout << "L'aire est : " << shape.Area() << " mm2" << std::endl;
+  std::cout << "Le perimetre est : " << shape.Perimeter() << " mm" << std::endl;
+}
 
 template<typename T>
 void DisplayResult(const T &shape)
 {
   static_assert(std::is_base_of_v<geom::Shape2D, T>, "DisplayResult<T> a besoin que T soit de type Shape2D");
-  std::cout << "L'aire est : " << algo::calculate_area(shape) << " mm2 \n";
-  std::cout << "Le perimetre est : " << algo::calculate_perimeter(shape) << " mm \n";
+  std::cout << "L'aire est : " << algo::calculate_area(shape) << " mm2" << std::endl;
+  std::cout << "Le perimetre est : " << algo::calculate_perimeter(shape) << " mm" << std::endl;
 }
 
 void InputChoice1()
@@ -45,7 +52,7 @@ void InputChoice1()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs" << std::endl; 
+      std::cout << "Erreur : Il faut saisir trois valeurs" << std::endl; 
     }
   }
   else
@@ -75,7 +82,7 @@ void InputChoice2()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire deux valeurs" << std::endl; 
+      std::cout << "Erreur : Il faut saisir deux valeurs" << std::endl; 
     }
   }
   else
@@ -105,7 +112,7 @@ void InputChoice3()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire deux valeurs" << std::endl; 
+      std::cout << "Erreur : Il faut saisir deux valeurs" << std::endl; 
     }
   }
   else
@@ -135,7 +142,7 @@ void InputChoice4()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire une valeur" << std::endl; 
+      std::cout << "Erreur : Il faut saisir une valeur" << std::endl; 
     }
   }
   else
@@ -165,7 +172,7 @@ void InputChoice5()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire une valeurs" << std::endl; 
+      std::cout << "Erreur : Il faut saisir une valeurs" << std::endl; 
     }
   }
   else
@@ -176,7 +183,7 @@ void InputChoice5()
 
 void InputChoice6()
 {
-  std::cout << "Saisir la longueur de la largeur et de la hauteur (Largeur/Hauteur) : ";
+  std::cout << "Saisir la largeur et la hauteur (Largeur/Hauteur) : ";
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
@@ -195,7 +202,7 @@ void InputChoice6()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire deux valeurs" << std::endl; 
+      std::cout << "Erreur : Il faut saisir deux valeurs" << std::endl; 
     }
   }
   else
@@ -206,7 +213,7 @@ void InputChoice6()
 
 void InputChoice7()
 {
-  std::cout << "Saisir la longueur du rayon (Rayon) : ";
+  std::cout << "Saisir le rayon (Rayon) : ";
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
@@ -225,7 +232,7 @@ void InputChoice7()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire une valeur" << std::endl; 
+      std::cout << "Erreur : Il faut saisir une valeur" << std::endl; 
     }
   }
   else
@@ -236,7 +243,7 @@ void InputChoice7()
 
 void InputChoice8()
 {
-  std::cout << "Saisir Rayon interrieur et rayon exterieur (Rayon/Rayon) : ";
+  std::cout << "Saisir rayon interieur et rayon exterieur (Rayon/Rayon) : ";
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
@@ -255,7 +262,7 @@ void InputChoice8()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire deux valeurs" << std::endl; 
+      std::cout << "Erreur : Il faut saisir deux valeurs" << std::endl; 
     }
   }
   else
@@ -264,9 +271,80 @@ void InputChoice8()
   }
 }
 
+void Example()
+{
+  try
+  {
+    std::cout << "Triangle 1/2/3" << std::endl;
+    Triangle t = ShapeFactory::ConstructTriangleFromLengths({1, 2, 3});
+    DisplayShapeResult(t);
+  }
+  catch(const TriangleConstructionError& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
+
+  try
+  {
+    std::cout << "Triangle 20/30/30" << std::endl;
+    Triangle t = ShapeFactory::ConstructTriangleFromLengths({20, 30, 30});
+    DisplayShapeResult(t);
+  }
+  catch(const TriangleConstructionError& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
+
+  try
+  {
+    std::cout << "Rectangle 10/20" << std::endl;
+    Rectangle r = ShapeFactory::ConstructRectangleFromLengths(10, 20);
+    DisplayShapeResult(r);
+  }
+  catch(const RectangleConstructionError& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
+
+  try
+  {
+    std::cout << "Square 30" << std::endl;
+    Square s = ShapeFactory::ConstructSquareFromLengths(30);
+    DisplayShapeResult(s);
+  }
+  catch(const SquareConstructionError& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
+
+  try
+  {
+    std::cout << "Circle 10" << std::endl;
+    Circle c = ShapeFactory::ConstructCircleFromRadius(10);
+    DisplayShapeResult(c);
+  }
+  catch(const CircleConstructionError& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
+
+  try
+  {
+    std::cout << "Ring 10/20" << std::endl;
+    Ring r = ShapeFactory::ConstructRingFromRadii(10, 20);
+    DisplayShapeResult(r);
+  }
+  catch(const RingConstructionError& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
+}
+
 
 const char* choices = 
-  "Toutles les logeurs sont en mm\n"
+  "#################################\n"
+  "Toutes les les logeurs sont en mm\n"
+  "Les surfaces sont en mm2\n"
   "Les longueurs sont saparees par des / (slash)\n"
   "Choix de la forme\n"
   "1 - Triangle quelconque\n"
@@ -282,6 +360,8 @@ const char* choices =
 
 int main(int argc, char** argv)
 {
+  Example();
+
   std::cout << choices << std::endl;
 
   bool running = true;
@@ -333,7 +413,7 @@ int main(int argc, char** argv)
       }
       else
       {
-        std::cout << "Cette commande n'exister pas\n";
+        std::cout << "Cette commande n'existe pas" << std::endl;
       }
     }
   }

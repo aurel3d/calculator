@@ -45,7 +45,7 @@ void InputChoice1()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisir trois valeurs"; 
     }
   }
   else
@@ -79,7 +79,7 @@ void InputChoice2()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisir trois valeurs"; 
     }
   }
   else
@@ -113,7 +113,7 @@ void InputChoice3()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisir trois valeurs"; 
     }
   }
   else
@@ -148,7 +148,7 @@ void InputChoice4()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisir trois valeurs"; 
     }
   }
   else
@@ -180,7 +180,7 @@ void InputChoice5()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisir trois valeurs"; 
     }
   }
   else
@@ -191,7 +191,7 @@ void InputChoice5()
 
 void InputChoice6()
 {
-  std::cout << "Saisir la longueur de la largeur et de la hauteur (Largeur/Hauteur) : ";
+  std::cout << "Saisir la largeur et la hauteur (Largeur/Hauteur) : ";
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
@@ -213,7 +213,7 @@ void InputChoice6()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire deux valeurs"; 
+      std::cout << "Erreur : Il faut saisir deux valeurs"; 
     }
   }
   else
@@ -245,7 +245,7 @@ void InputChoice7()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire une valeurs"; 
+      std::cout << "Erreur : Il faut saisir une valeurs"; 
     }
   }
   else
@@ -256,7 +256,7 @@ void InputChoice7()
 
 void InputChoice8()
 {
-  std::cout << "Saisir Rayon interrieur et rayon exterieur (Rayon/Rayon) : ";
+  std::cout << "Saisir rayon interieur et rayon exterieur (Rayon/Rayon) : ";
   std::string value;
   std::cin >> value;
   std::vector<double> lengths;
@@ -278,7 +278,7 @@ void InputChoice8()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire deux valeurs"; 
+      std::cout << "Erreur : Il faut saisir deux valeurs"; 
     }
   }
   else
@@ -287,78 +287,81 @@ void InputChoice8()
   }
 }
 
+// const char* choices = 
+//   "Toutes les les logeurs sont en mm\n"
+//   "Les surfaces sont en mm2\n"
+//   "Les longueurs sont saparees par des / (slash)\n"
+//   "Choix de la forme\n"
+//   "1 - Triangle quelconque\n"
+//   "2 - Triangle rectanle\n"
+//   "3 - Triangle isocel\n"
+//   "4 - Triangle equilateral\n"
+//   "5 - Carre\n"
+//   "6 - Rectangle\n"
+//   "7 - Cercle\n"
+//   "8 - Couronne\n"
+//   "9 - Exit\n";
 
-const char* choices = 
-  "Toutles les logeurs sont en mm\n"
-  "Les longueurs sont saparees par des / (slash)\n"
-  "Choix de la forme\n"
-  "1 - Triangle quelconque\n"
-  "2 - Triangle rectanle\n"
-  "3 - Triangle isocel\n"
-  "4 - Triangle equilateral\n"
-  "5 - Carre\n"
-  "6 - Rectangle\n"
-  "7 - Cercle\n"
-  "8 - Couronne\n"
-  "9 - Exit\n";
+// int main(int argc, char** argv)
+// {
+ 
 
-int main(int argc, char** argv)
-{
-  std::cout << choices << std::endl;
 
-  bool running = true;
+//   std::cout << choices << std::endl;
 
-  while(running)
-  {
-    std::cout << "Choix de la forme : ";
-    std::string choice;
-    std::cin >> choice;
+//   bool running = true;
 
-    if(!choice.empty())
-    {
-      if(choice == "1")
-      {
-        InputChoice1();
-      }
-      else if(choice == "2")
-      {
-        InputChoice2();
-      }
-      else if(choice == "3")
-      {
-        InputChoice3();
-      }
-      else if(choice == "4")
-      {
-        InputChoice4();
-      }
-      else if(choice == "5")
-      {
-        InputChoice5();
-      }
-      else if(choice == "6")
-      {
-        InputChoice6();
-      }
-      else if(choice == "7")
-      {
-        InputChoice7();
-      }
-      else if(choice == "8")
-      {
-        InputChoice8();
-      }
-      else if(choice == "9")
-      {
-        running = false;
-        break;
-      }
-      else
-      {
-        std::cout << "Cette commande n'existe pas\n";
-      }
-    }
-  }
+//   while(running)
+//   {
+//     std::cout << "Choix de la forme : ";
+//     std::string choice;
+//     std::cin >> choice;
 
-  return 0;
-}
+//     if(!choice.empty())
+//     {
+//       if(choice == "1")
+//       {
+//         InputChoice1();
+//       }
+//       else if(choice == "2")
+//       {
+//         InputChoice2();
+//       }
+//       else if(choice == "3")
+//       {
+//         InputChoice3();
+//       }
+//       else if(choice == "4")
+//       {
+//         InputChoice4();
+//       }
+//       else if(choice == "5")
+//       {
+//         InputChoice5();
+//       }
+//       else if(choice == "6")
+//       {
+//         InputChoice6();
+//       }
+//       else if(choice == "7")
+//       {
+//         InputChoice7();
+//       }
+//       else if(choice == "8")
+//       {
+//         InputChoice8();
+//       }
+//       else if(choice == "9")
+//       {
+//         running = false;
+//         break;
+//       }
+//       else
+//       {
+//         std::cout << "Cette commande n'existe pas" << std::endl;
+//       }
+//     }
+//   }
+
+//   return 0;
+// }
