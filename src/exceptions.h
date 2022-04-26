@@ -4,12 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct TriangleConstructionError : public std::exception
+class TriangleConstructionError : public std::exception
 {
   double m_Side1;
   double m_Side2;
   double m_Side3;
   
+public:
   TriangleConstructionError(double side1, double side2, double side3):
     m_Side1 {side1},
     m_Side2 {side2},
@@ -25,10 +26,11 @@ struct TriangleConstructionError : public std::exception
   }
 };
 
-struct SquareConstructionError : public std::exception
+class SquareConstructionError : public std::exception
 {
   double m_Width;
   
+public:
   SquareConstructionError(double width):
     m_Width(width)
   {
@@ -42,11 +44,12 @@ struct SquareConstructionError : public std::exception
   }
 };
 
-struct RectangleConstructionError : public std::exception
+class RectangleConstructionError : public std::exception
 {
   double m_Width;
   double m_Height;
   
+public:
   RectangleConstructionError(double width, double height):
     m_Width(width),
     m_Height(height)
@@ -61,10 +64,11 @@ struct RectangleConstructionError : public std::exception
   }
 };
 
-struct CircleConstructionError : public std::exception
+class CircleConstructionError : public std::exception
 {
   double m_Radius;
   
+public:
   CircleConstructionError(double radius):
     m_Radius(radius)
   {
@@ -78,11 +82,12 @@ struct CircleConstructionError : public std::exception
   }
 };
 
-struct RingConstructionError : public std::exception
+class RingConstructionError : public std::exception
 {
   double m_Radius1;
   double m_Radius2;
-  
+
+public:
   RingConstructionError(double radius1, double radius2):
     m_Radius1(radius1),
     m_Radius2(radius2)
