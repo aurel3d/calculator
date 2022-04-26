@@ -8,16 +8,20 @@
 #include <memory>
 #include <string>
 #include <stdio.h>
+#include <type_traits>
 
 #include "exceptions.h"
+#include "geom.hpp"
+#include "algo.hpp"
 #include "utils.hpp"
-#include "ShapeFactory.h"
-#include "Shape.h"
 
-void DisplayResult(const Shape &shape)
+
+template<typename T>
+void DisplayResult(const T &shape)
 {
-  std::cout << "L'aire est : " << shape.Area() << " mm2 \n";
-  std::cout << "Le perimetre est : " << shape.Perimeter() << " mm \n";
+  static_assert(std::is_base_of_v<geom::Shape2D, T>, "DisplayResult<T> a besoin que T soit de type Shape2D");
+  std::cout << "L'aire est : " << algo::calculate_area(shape) << " mm2 \n";
+  std::cout << "Le perimetre est : " << algo::calculate_perimeter(shape) << " mm \n";
 }
 
 void InputChoice1()
@@ -30,27 +34,23 @@ void InputChoice1()
   {
     if(lengths.size() == 3)
     {
-      std::array<double, 3> arrayOfLength = {};
-      std::copy_n(lengths.begin(), 3, arrayOfLength.begin());
-
       try
       {
-        Triangle t = ShapeFactory::ConstructTriangleFromLengths(arrayOfLength);
-        DisplayResult(t);
+        DisplayResult(geom::make_triangle(lengths[0], lengths[1], lengths[2]));
       } 
       catch(const TriangleConstructionError& e)
       {
-        std::cerr << e.what() << '\n';
+        std::cerr << e.what() << std::endl;
       }
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisire trois valeurs" << std::endl; 
     }
   }
   else
   {
-    std::cout << "Les donnees saisies ne sont pas correctes\n";
+    std::cout << "Les donnees saisies ne sont pas correctes" << std::endl;
   }
 }
 
@@ -64,27 +64,23 @@ void InputChoice2()
   {
     if(lengths.size() == 2)
     {
-      std::array<double, 2> arrayOfLength = {};
-      std::copy_n(lengths.begin(), 2, arrayOfLength.begin());
-
       try
       {
-        Triangle t = ShapeFactory::ConstructRectangleTriangleFromLengths(arrayOfLength);
-        DisplayResult(t);
+        DisplayResult(geom::make_rectangleTriangle(lengths[0], lengths[1]));
       } 
       catch(const TriangleConstructionError& e)
       {
-        std::cerr << e.what() << '\n';
+        std::cerr << e.what() << std::endl;
       }
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisire deux valeurs" << std::endl; 
     }
   }
   else
   {
-    std::cout << "Les donnees saisies ne sont pas correctes\n";
+    std::cout << "Les donnees saisies ne sont pas correctes" << std::endl;
   }
 }
 
@@ -98,27 +94,23 @@ void InputChoice3()
   {
     if(lengths.size() == 2)
     {
-      std::array<double, 3> arrayOfLength = {};
-      std::copy_n(lengths.begin(), 2, arrayOfLength.begin());
-      arrayOfLength[2] = lengths[1];
       try
       {
-        Triangle t = ShapeFactory::ConstructTriangleFromLengths(arrayOfLength);
-        DisplayResult(t);
+        DisplayResult(geom::make_isoscelesTriangle(lengths[0], lengths[1]));
       } 
       catch(const TriangleConstructionError& e)
       {
-        std::cerr << e.what() << '\n';
+        std::cerr << e.what() << std::endl;
       }
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisire deux valeurs" << std::endl; 
     }
   }
   else
   {
-    std::cout << "Les donnees saisies ne sont pas correctes\n";
+    std::cout << "Les donnees saisies ne sont pas correctes" << std::endl;
   }
 }
 
@@ -132,14 +124,9 @@ void InputChoice4()
   {
     if(lengths.size() == 1)
     {
-      std::array<double, 3> arrayOfLength = {};
-      std::copy_n(lengths.begin(), 1, arrayOfLength.begin());
-      arrayOfLength[1] = lengths[0];
-      arrayOfLength[2] = lengths[0];
       try
       {
-        Triangle t = ShapeFactory::ConstructTriangleFromLengths(arrayOfLength);
-        DisplayResult(t);
+        DisplayResult(geom::make_equilateralTriangle(lengths[0]));
       } 
       catch(const TriangleConstructionError& e)
       {
@@ -148,12 +135,12 @@ void InputChoice4()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisire une valeur" << std::endl; 
     }
   }
   else
   {
-    std::cout << "Les donnees saisies ne sont pas correctes\n";
+    std::cout << "Les donnees saisies ne sont pas correctes" << std::endl;
   }
 }
 
@@ -167,11 +154,9 @@ void InputChoice5()
   {
     if(lengths.size() == 1)
     {
-      double width = lengths[0];
       try
       {
-        Square s = ShapeFactory::ConstructSquareFromLengths(width);
-        DisplayResult(s);
+        DisplayResult(geom::make_square(lengths[0]));
       } 
       catch(const SquareConstructionError& e)
       {
@@ -180,12 +165,12 @@ void InputChoice5()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire trois valeurs"; 
+      std::cout << "Erreur : Il faut saisire une valeurs" << std::endl; 
     }
   }
   else
   {
-    std::cout << "Les donnees saisies ne sont pas correctes\n";
+    std::cout << "Les donnees saisies ne sont pas correctes" << std::endl;
   }
 }
 
@@ -199,26 +184,23 @@ void InputChoice6()
   {
     if(lengths.size() == 2)
     {
-      double width = lengths[0];
-      double height = lengths[1];
       try
       {
-        Rectangle r = ShapeFactory::ConstructRectangleFromLengths(width, height, r);
-        DisplayResult(r);
+        DisplayResult(geom::make_rectangle(lengths[0], lengths[1]));
       } 
-      catch(const SquareConstructionError& e)
+      catch(const RectangleConstructionError& e)
       {
         std::cerr << e.what() << '\n';
       }
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire deux valeurs"; 
+      std::cout << "Erreur : Il faut saisire deux valeurs" << std::endl; 
     }
   }
   else
   {
-    std::cout << "Les donnees saisies ne sont pas correctes\n";
+    std::cout << "Les donnees saisies ne sont pas correctes" << std::endl;
   }
 }
 
@@ -232,11 +214,9 @@ void InputChoice7()
   {
     if(lengths.size() == 1)
     {
-      double radius = lengths[0];
       try
       {
-        Circle c = ShapeFactory::ConstructCircleFromRadius(radius);
-        DisplayResult(c);
+        DisplayResult(geom::make_circle(lengths[0]));
       } 
       catch(const CircleConstructionError& e)
       {
@@ -245,12 +225,12 @@ void InputChoice7()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire une valeurs"; 
+      std::cout << "Erreur : Il faut saisire une valeur" << std::endl; 
     }
   }
   else
   {
-    std::cout << "Les donnees saisies ne sont pas correctes\n";
+    std::cout << "Les donnees saisies ne sont pas correctes" << std::endl;
   }
 }
 
@@ -264,12 +244,9 @@ void InputChoice8()
   {
     if(lengths.size() == 2)
     {
-      double radius1 = lengths[0];
-      double radius2 = lengths[1];
       try
       {
-        Ring r = ShapeFactory::ConstructRingFromRadii(radius1, radius2);
-        DisplayResult(r);
+        DisplayResult(geom::make_ring(lengths[0], lengths[1]));
       } 
       catch(const RingConstructionError& e)
       {
@@ -278,12 +255,12 @@ void InputChoice8()
     }
     else
     {
-      std::cout << "Erreur : Il faut saisire deux valeurs"; 
+      std::cout << "Erreur : Il faut saisire deux valeurs" << std::endl; 
     }
   }
   else
   {
-    std::cout << "Les donnees saisies ne sont pas correctes\n";
+    std::cout << "Les donnees saisies ne sont pas correctes" << std::endl;
   }
 }
 
@@ -301,6 +278,7 @@ const char* choices =
   "7 - Cercle\n"
   "8 - Couronne\n"
   "9 - Exit\n";
+
 
 int main(int argc, char** argv)
 {
@@ -355,7 +333,7 @@ int main(int argc, char** argv)
       }
       else
       {
-        std::cout << "Cette commande n'existe pas\n";
+        std::cout << "Cette commande n'exister pas\n";
       }
     }
   }
