@@ -38,6 +38,18 @@ struct Polygon : public Shape2D
 	{
 	}
 
+	Polygon(Polygon&& other):
+		points { std::move(other.points) }
+	{
+	}
+
+	Polygon(const Polygon& other):
+		points { other.points }
+	{
+	}
+
+	~Polygon() = default;
+
 	std::vector<PolygonPoint> points = {};
 };
 
@@ -48,6 +60,19 @@ struct Circle : public Shape2D
 		radius { t_radius }
 	{
 	}
+
+	Circle(Circle&& other):
+		radius { std::exchange(other.radius, T {}) }
+	{
+	}
+
+	Circle(const Circle& other):
+		radius { other.radius }
+	{
+	}
+
+	~Circle() = default;
+
 	T radius;
 };
 
@@ -58,6 +83,18 @@ struct Ring : public Shape2D
 		innerCircle { t_innerCircle },
 		outerCircle { t_outerCircle }
 	{}
+
+	Ring(Ring&& other):
+		innerCircle { std::move(other.innerCircle) },
+		outerCircle { std::move(other.outerCircle) }
+	{}
+
+	Ring(const Ring& other):
+		innerCircle { other.innerCircle },
+		outerCircle { other.outerCircle }
+	{}
+
+	~Ring() = default;
 
 	Circle<T> innerCircle;
 	Circle<T> outerCircle;
@@ -84,6 +121,8 @@ struct Triangle : public Shape2D
 	{
 	}
 
+	~Triangle() = default;
+
 	std::array<PointType, 3> points = {};
 };
 
@@ -97,6 +136,18 @@ struct Square : public Shape2D
 	{	
 	}
 
+	Square(Square&& other):
+		points { std::move(other.points) }
+	{
+	}
+
+	Square(const Square& other):
+		points { other.points }
+	{
+	}
+
+	~Square() = default;
+
 	std::array<PointType, 4> points = {};
 };
 
@@ -107,8 +158,20 @@ struct Rectangle : public Shape2D
 
 	Rectangle(const std::array<PointType, 4>& t_points):
 		points { t_points }
+	{ 
+	}
+
+	Rectangle(Rectangle&& other):
+		points { std::move(other.points) }
 	{
 	}
+
+	Rectangle(const Rectangle& other):
+		points { other.points }
+	{
+	}
+
+	~Rectangle() = default;
 
 	std::array<PointType, 4> points = {};
 };
@@ -210,12 +273,12 @@ Circle<T> make_circle(T radius)
 template<typename T>
 Ring<T> make_ring(T innerRadius, T outerRadius)
 {
-	if(innerRadius <= 0.0 || outerRadius <= 0.0)
+	if(innerRadius <= 0.0 || outerRadius <= 0.0 || innerRadius == outerRadius)
   {
     throw RingConstructionError(innerRadius, outerRadius);
   }
 
-	Ring<T> r = {Circle{innerRadius}, Circle{outerRadius}};
+	Ring<T> r = {Circle<T>{innerRadius}, Circle<T>{outerRadius}};
 	return r;
 }
 

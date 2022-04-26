@@ -8,15 +8,18 @@
 #include <memory>
 #include <string>
 #include <stdio.h>
+#include <type_traits>
 
 #include "exceptions.h"
 #include "geom.hpp"
 #include "algo.hpp"
 #include "utils.hpp"
 
+
 template<typename T>
 void DisplayResult(const T &shape)
 {
+  static_assert(std::is_base_of_v<geom::Shape2D, T>, "DisplayResult<T> a besoin que T soit de type Shape2D");
   std::cout << "L'aire est : " << algo::calculate_area(shape) << " mm2 \n";
   std::cout << "Le perimetre est : " << algo::calculate_perimeter(shape) << " mm \n";
 }
@@ -275,6 +278,8 @@ const char* choices =
   "7 - Cercle\n"
   "8 - Couronne\n"
   "9 - Exit\n";
+
+
 
 int main(int argc, char** argv)
 {

@@ -17,7 +17,7 @@ bool ConvertToDouble(const std::string &value, double &out)
   }
   catch(const std::exception& e)
   {
-    std::cout << "Convertion de " << value << " en double impossible" << std::endl;
+    std::cout << e.what() << " Conversion de \"" << value << "\" en double impossible" << std::endl;
     return false;
   }
 

@@ -11,327 +11,13 @@
 
 #include "exceptions.h"
 #include "utils.hpp"
+#include "ShapeFactory.h"
+#include "Shape.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-
-struct Point
+void DisplayResult(const Shape &shape)
 {
-  double x = {};
-  double y = {};
-};
-
-double Distance(const Point &p1, const Point &p2)
-{
-  return std::sqrt(std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2));
-}
-
-class Shape
-{
-public:
-  Shape() {}
-
-  virtual double Area() = 0;
-  virtual double Perimeter() = 0;
-};
-
-class Polygon : public Shape
-{
-public:
-  Polygon() {}
-
-  double Perimeter() override
-  {
-    double total = {};
-    size_t i = 1;
-    for(i = 1; i < m_Points.size(); ++i)
-    {
-      total += Distance(m_Points[i-1], m_Points[i]);
-    }
-    if(i > 1)
-    {
-      total += Distance(m_Points[0], m_Points[i-1]);
-    }
-    return total;
-  }
-
-protected:
-  std::vector<Point> m_Points;
-};
-
-class Triangle : public Polygon
-{
-
-  /*   
-
-          P2
-          /\
-         /  \
-        /    \
-       /      \
-      /        \
-     /          \
-    /            \
-    P0-----------P1
-
-  */
-
-
-public:
-  Triangle() 
-  {
-    m_Points = { Point{}, Point{}, Point{} };
-  }
-
-  void SetP1(const Point &point)
-  {
-    m_Points[0] = point;
-  }
-
-  void SetP2(const Point &point)
-  {
-    m_Points[1] = point;
-  }
-
-  void SetP3(const Point &point)
-  {
-    m_Points[2] = point;
-  }
-
-  /*
-  Calcul de l'aire grace a la formule de Heron
-  https://fr.wikipedia.org/wiki/Formule_de_H%C3%A9ron
-  */
-  double Area() override
-  {
-    double AB = Distance(m_Points[0], m_Points[1]);
-    double BC = Distance(m_Points[1], m_Points[2]);
-    double CA = Distance(m_Points[2], m_Points[0]);
-
-    double p = (AB + BC + CA) / 2.0;
-    double s = p * (p - AB) * (p - BC) * (p - CA);
-
-    return std::sqrt(s);
-  }
-};
-
-class Rectangle : public Polygon
-{
-
-  /*
-     (0, height)    (width, height)
-      P3-------------P2
-      |              |
-      |              |
-      |              |
-      P0-------------P1
-     (0,0)          (width, 0)
-  
-  */
-
-public:
-  Rectangle()
-  {
-    m_Points = { Point{}, Point{}, Point{}, Point{} };
-  }
-
-  void SetDimensions(double width, double height)
-  {
-    m_Points[1] = Point{ width, 0.0     };
-    m_Points[2] = Point{ width, height  };
-    m_Points[3] = Point{ 0.0,   height  };
-  }
-
-  double Area() override
-  {
-    double width = Distance(m_Points[0], m_Points[1]);
-    double height = Distance(m_Points[1], m_Points[2]);
-
-    return width * height;
-  }
-
-};
-
-class Square : public Polygon
-{
-
-  /*
-     (0, width)    (width, width)
-      P3-------------P2
-      |              |
-      |              |
-      |              |
-      P0-------------P1
-     (0,0)          (width, 0)
-  
-  */
-
-public:
-  Square()
-  {
-    m_Points = { Point{}, Point{}, Point{}, Point{} };
-  }
-
-  void SetWidth(double width)
-  {
-    m_Points[1] = Point{ width, 0.0     };
-    m_Points[2] = Point{ width, width  };
-    m_Points[3] = Point{ 0.0,   width  };
-  }
-
-  double Area() override
-  {
-    double width = Distance(m_Points[0], m_Points[1]);
-
-    return std::pow(width, 2);
-  }
-
-};
-
-class Circle : public Shape
-{
-public:
-  Circle():
-    m_Radius {}
-  {
-
-  }
-
-  void SetRadius(double radius)
-  {
-    m_Radius = radius;
-  }
-
-  double Area() override
-  {
-    return M_PI * std::pow(m_Radius, 2);
-  }
-
-  double Perimeter() override
-  {
-    return 2 * M_PI * m_Radius;
-  }
-
-private:
-  double m_Radius;
-};
-
-class Ring : public Shape
-{
-public:
-  Ring():
-    m_ExternalCircle{},
-    m_InternalCircle{}
-  {
-
-  }
-
-  void SetExternalCircle(const Circle &circle)
-  {
-    m_ExternalCircle = circle;
-  }
-
-  void SetInternalCircle(const Circle &circle)
-  {
-    m_ExternalCircle = circle;
-  }
-
-  double Area() override
-  {
-    return m_ExternalCircle.Area() - m_InternalCircle.Area();
-  }
-
-  double Perimeter() override
-  {
-    return m_ExternalCircle.Perimeter() + m_InternalCircle.Perimeter();
-  }
-
-private:
-  Circle m_ExternalCircle;
-  Circle m_InternalCircle;
-};
-
-void ConstructTriangleFromLengths(const std::array<double, 3> &lengths, Triangle &out)
-{
-  if( (lengths[0] >= (lengths[1] + lengths[2]))
-    ||(lengths[0] <= std::abs(lengths[1] - lengths[2])))
-  {
-    throw TriangleConstructionError(lengths[0], lengths[1], lengths[2]);
-  } 
-
-  Point p1 {0.0, 0.0};
-  Point p2 {lengths[0], 0.0};
-  Point p3 {0.0, 0.0};
-
-  p3.x = (std::pow(lengths[0], 2) + std::pow(lengths[2], 2) - std::pow(lengths[1], 2)) / (2*lengths[0]);
-  p3.y = std::sqrt(std::pow(lengths[2], 2) - std::pow(p3.x, 2));
-
-  out.SetP1(p1);
-  out.SetP2(p2);
-  out.SetP3(p3);
-}
-
-void ConstructRectangleTriangleFromLengths(const std::array<double, 2> &lengths, Triangle &out)
-{
-  if( lengths[0] <= 0.0 || lengths[1] <= 0.0)
-  {
-    throw TriangleConstructionError(lengths[0], lengths[1], 0.0);
-  } 
-
-  Point p1 {0.0, 0.0};
-  Point p2 {lengths[0], 0.0};
-  Point p3 {0.0, lengths[1]};
-
-  out.SetP1(p1);
-  out.SetP2(p2);
-  out.SetP3(p3);
-}
-
-void ConstructSquareFromLengths(double width, Square &out)
-{
-  if(width <= 0.0)
-  {
-    throw SquareConstructionError(width);
-  }
-
-  out.SetWidth(width);
-}
-
-void ConstructRectangleFromLengths(double width, double height, Rectangle &out)
-{
-  if(width <= 0.0)
-  {
-    throw SquareConstructionError(width);
-  }
-
-  out.SetDimensions(width, height);
-}
-
-void ConstructCircleFromRadius(double radius, Circle &out)
-{
-  if(radius <= 0.0)
-  {
-    throw CircleConstructionError(radius);
-  }
-
-  out.SetRadius(radius);
-}
-
-void ConstructRingFromRadii(double internalRadius, double externalRadius, Ring &out)
-{
-  if(internalRadius <= 0.0 || externalRadius <= 0.0)
-  {
-    throw RingConstructionError(internalRadius, externalRadius);
-  }
-
-  Circle c1, c2;
-  c1.SetRadius(internalRadius);
-  c2.SetRadius(externalRadius);
-
-  out.SetInternalCircle(c1);
-  out.SetExternalCircle(c2);
+  std::cout << "L'aire est : " << shape.Area() << " mm2 \n";
+  std::cout << "Le perimetre est : " << shape.Perimeter() << " mm \n";
 }
 
 void InputChoice1()
@@ -349,10 +35,8 @@ void InputChoice1()
 
       try
       {
-        Triangle t {};
-        ConstructTriangleFromLengths(arrayOfLength, t);
-        std::cout << "L'air du triangle est : " << t.Area() << "\n";
-        std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
+        Triangle t = ShapeFactory::ConstructTriangleFromLengths(arrayOfLength);
+        DisplayResult(t);
       } 
       catch(const TriangleConstructionError& e)
       {
@@ -385,10 +69,8 @@ void InputChoice2()
 
       try
       {
-        Triangle t {};
-        ConstructRectangleTriangleFromLengths(arrayOfLength, t);
-        std::cout << "L'air du triangle est : " << t.Area() << "\n";
-        std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
+        Triangle t = ShapeFactory::ConstructRectangleTriangleFromLengths(arrayOfLength);
+        DisplayResult(t);
       } 
       catch(const TriangleConstructionError& e)
       {
@@ -421,10 +103,8 @@ void InputChoice3()
       arrayOfLength[2] = lengths[1];
       try
       {
-        Triangle t {};
-        ConstructTriangleFromLengths(arrayOfLength, t);
-        std::cout << "L'air du triangle est : " << t.Area() << "\n";
-        std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
+        Triangle t = ShapeFactory::ConstructTriangleFromLengths(arrayOfLength);
+        DisplayResult(t);
       } 
       catch(const TriangleConstructionError& e)
       {
@@ -458,10 +138,8 @@ void InputChoice4()
       arrayOfLength[2] = lengths[0];
       try
       {
-        Triangle t {};
-        ConstructTriangleFromLengths(arrayOfLength, t);
-        std::cout << "L'air du triangle est : " << t.Area() << "\n";
-        std::cout << "Le perimetre du triangle est : " << t.Perimeter() << "\n";
+        Triangle t = ShapeFactory::ConstructTriangleFromLengths(arrayOfLength);
+        DisplayResult(t);
       } 
       catch(const TriangleConstructionError& e)
       {
@@ -492,10 +170,8 @@ void InputChoice5()
       double width = lengths[0];
       try
       {
-        Square s {};
-        ConstructSquareFromLengths(width, s);
-        std::cout << "L'air du carre est : " << s.Area() << "\n";
-        std::cout << "Le perimetre du carre est : " << s.Perimeter() << "\n";
+        Square s = ShapeFactory::ConstructSquareFromLengths(width);
+        DisplayResult(s);
       } 
       catch(const SquareConstructionError& e)
       {
@@ -527,10 +203,8 @@ void InputChoice6()
       double height = lengths[1];
       try
       {
-        Rectangle r {};
-        ConstructRectangleFromLengths(width, height, r);
-        std::cout << "L'air du carre est : " << r.Area() << "\n";
-        std::cout << "Le perimetre du carre est : " << r.Perimeter() << "\n";
+        Rectangle r = ShapeFactory::ConstructRectangleFromLengths(width, height, r);
+        DisplayResult(r);
       } 
       catch(const SquareConstructionError& e)
       {
@@ -561,10 +235,8 @@ void InputChoice7()
       double radius = lengths[0];
       try
       {
-        Circle c {};
-        ConstructCircleFromRadius(radius, c);
-        std::cout << "L'air du cercle est : " << c.Area() << "\n";
-        std::cout << "Le perimetre du cercle est : " << c.Perimeter() << "\n";
+        Circle c = ShapeFactory::ConstructCircleFromRadius(radius);
+        DisplayResult(c);
       } 
       catch(const CircleConstructionError& e)
       {
@@ -596,10 +268,8 @@ void InputChoice8()
       double radius2 = lengths[1];
       try
       {
-        Ring r {};
-        ConstructRingFromRadii(radius1, radius2, r);
-        std::cout << "L'air du cercle est : " << r.Area() << "\n";
-        std::cout << "Le perimetre du cercle est : " << r.Perimeter() << "\n";
+        Ring r = ShapeFactory::ConstructRingFromRadii(radius1, radius2);
+        DisplayResult(r);
       } 
       catch(const RingConstructionError& e)
       {
@@ -685,7 +355,7 @@ int main(int argc, char** argv)
       }
       else
       {
-        std::cout << "Cette commande n'exister pas\n";
+        std::cout << "Cette commande n'existe pas\n";
       }
     }
   }
